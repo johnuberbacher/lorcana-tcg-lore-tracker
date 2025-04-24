@@ -22,9 +22,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.lorcanatcgloretracker.presentation.theme.MyColors
 import com.example.lorcanatcgloretracker.presentation.theme.MyFontFamily
 
 class MainActivity : ComponentActivity() {
@@ -60,12 +62,12 @@ fun WearApp() {
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .background(colors.primary)
+                    .background(MyColors.primary)
                     .clickable { leftCount++ },
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = "$leftCount",
-                    fontFamily = MyFontFamily, color = colors.onPrimary, fontSize = 40.sp, fontWeight = FontWeight.Bold)
+                    fontFamily = MyFontFamily, color = MyColors.secondary, fontSize = 40.sp, fontWeight = FontWeight.Bold)
             }
 
             // Right Half
@@ -73,12 +75,12 @@ fun WearApp() {
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .background(colors.primary)
+                    .background(MyColors.primary)
                     .clickable { rightCount++ },
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = "$rightCount",
-                    fontFamily = MyFontFamily, color = colors.onPrimary, fontSize = 40.sp, fontWeight = FontWeight.Bold)
+                    fontFamily = MyFontFamily, color = MyColors.secondary, fontSize = 40.sp, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -94,7 +96,7 @@ fun WearApp() {
                     .background(Color.Black.copy(alpha = 0.1f))
                     .clickable(
                         onClick = { /* Do nothing for now */ },
-                        role = null // You can add Role.Button if this is a button
+                        role = Role.Button
                     )
                     .padding(horizontal = 8.dp)
             ) {
@@ -107,16 +109,16 @@ fun WearApp() {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
-                            tint = Color.White,
+                            tint = MyColors.secondary,
                             modifier = Modifier.size(17.dp)
                         )
                     }
                     Box(
                         modifier = Modifier
                             .padding(bottom = 1.dp)) {
-                        Text(text = "$rightCount",
+                        Text(text = "$maxLoreCount",
                             textAlign = TextAlign.Center,
-                            fontFamily = MyFontFamily, color = colors.onPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            fontFamily = MyFontFamily, color = MyColors.secondary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -142,7 +144,7 @@ fun WearApp() {
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Settings",
-                    tint = Color.White,
+                    tint = MyColors.secondary,
                     modifier = Modifier.size(18.dp)
                 )
             }

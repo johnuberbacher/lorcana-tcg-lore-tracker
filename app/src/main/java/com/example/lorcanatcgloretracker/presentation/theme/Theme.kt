@@ -7,6 +7,7 @@ import androidx.wear.compose.material.MaterialTheme
 @Composable
 fun LorcanaTCGLoreTrackerTheme(content: @Composable () -> Unit) {
     MaterialTheme(
+        colors = MyColors,
         typography = MyTypography
     ) {
         content()
