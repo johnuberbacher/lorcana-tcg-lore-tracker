@@ -87,7 +87,7 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
     Box(modifier = Modifier.fillMaxSize()) {
         if (selectedTheme == "image") {
             Image(
-                painter = painterResource(id = R.drawable.background),
+                painter = painterResource(id = R.drawable.image_background),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
