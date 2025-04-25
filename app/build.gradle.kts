@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.watchface.complications.data.source.ktx)
     implementation(libs.navigation.compose)
     implementation(libs.compose.navigation)
+    implementation(libs.wear)
 
     // Android Test Dependencies
     androidTestImplementation(platform(libs.compose.bom))
@@ -67,4 +68,7 @@ dependencies {
     // Material3 Dependency
     implementation(libs.material3)
     implementation(libs.compose.material)
+
+    // implementation(libs.ambient)
+    //implementation(libs.wear.ambient)
 }
