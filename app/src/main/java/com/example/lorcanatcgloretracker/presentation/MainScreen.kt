@@ -127,7 +127,7 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                     .background(
                         if (selectedTheme == "dark") Color.White.copy(alpha = 0.033f)
                         else if (selectedTheme == "oled") Color.White.copy(alpha = 0.0f)
-                        else Color.Black.copy(alpha = 0.5f)
+                        else Color.Black.copy(alpha = 0.25f)
                     )
                     .weight(1f)
                     .fillMaxHeight(),
@@ -164,7 +164,7 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                     .background(
                         if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f)
                         else if (selectedTheme == "oled") Color.White.copy(alpha = 0.0f)
-                        else Color.Black.copy(alpha = 0.1f)
+                        else Color.Black.copy(alpha = 0.33f)
                     )
                     .clickable(
                         onClick = { cycleMaxLoreCount() },
@@ -214,7 +214,7 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                     .background(
                         if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f)
                         else if (selectedTheme == "oled") Color.White.copy(alpha = 0.0f)
-                        else Color.Black.copy(alpha = 0.1f)
+                        else Color.Black.copy(alpha = 0.33f)
                     )
                     .clickable(
                         onClick = { onOpenSettings() },
