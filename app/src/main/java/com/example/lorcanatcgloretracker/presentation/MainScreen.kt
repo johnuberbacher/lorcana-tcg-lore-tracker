@@ -1,6 +1,7 @@
 package com.example.lorcanatcgloretracker.presentation
 
 import android.media.SoundPool
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -30,7 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -82,11 +84,22 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MyColors.primary)
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (selectedTheme == "image") {
+            Image(
+                painter = painterResource(id = R.drawable.background),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+            )
+        }
+
         Row(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -103,21 +116,19 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                     onDecrease = { leftCount-- },
                     onIncrease = { leftCount++ },
                     soundPool = soundPool,
-                    soundGetLore = soundGetLore
+                    soundGetLore = soundGetLore,
+                    settingsViewModel = settingsViewModel
                 )
             }
-
-            // Vertical Divider
-            Box(
-                modifier = Modifier
-                    .width(2.dp)
-                    .fillMaxHeight()
-                    .background(Color.Black.copy(alpha = 0.1f))
-            )
 
             // Right Half
             Box(
                 modifier = Modifier
+                    .background(
+                        if (selectedTheme == "dark") Color.White.copy(alpha = 0.033f)
+                        else if (selectedTheme == "oled") Color.White.copy(alpha = 0.0f)
+                        else Color.Black.copy(alpha = 0.5f)
+                    )
                     .weight(1f)
                     .fillMaxHeight(),
                 contentAlignment = Alignment.Center
@@ -133,7 +144,8 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                         }
                     },
                     soundPool = soundPool,
-                    soundGetLore = soundGetLore
+                    soundGetLore = soundGetLore,
+                    settingsViewModel = settingsViewModel
                 )
             }
         }
@@ -149,7 +161,11 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.1f))
+                    .background(
+                        if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f)
+                        else if (selectedTheme == "oled") Color.White.copy(alpha = 0.0f)
+                        else Color.Black.copy(alpha = 0.1f)
+                    )
                     .clickable(
                         onClick = { cycleMaxLoreCount() },
                     )
@@ -165,17 +181,17 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                             contentDescription = "bar action image",
                             modifier = Modifier
                                 .size(15.dp), // image height,
-                            tint = Color.Unspecified
+                            tint = if (selectedTheme == "oled") Color.White else Color.Unspecified
                         )
                     }
                     Box(
                         modifier = Modifier.padding(bottom = 1.dp)
                     ) {
                         Text(
-                            text = "$selectedTheme  $maxLoreCount",
+                            text = "$maxLoreCount",
                             textAlign = TextAlign.Center,
                             fontFamily = MyFontFamily,
-                            color = MyColors.secondary,
+                            color = if (selectedTheme == "oled") Color.White else MyColors.secondary,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -195,7 +211,11 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                 modifier = Modifier
                     .padding(bottom = 8.dp)
                     .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.1f))
+                    .background(
+                        if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f)
+                        else if (selectedTheme == "oled") Color.White.copy(alpha = 0.0f)
+                        else Color.Black.copy(alpha = 0.1f)
+                    )
                     .clickable(
                         onClick = { onOpenSettings() },
                         role = null // You can add Role.Button if this is a button
@@ -205,7 +225,7 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Settings",
-                    tint = MyColors.secondary,
+                    tint = if (selectedTheme == "oled") Color.White else MyColors.secondary,
                     modifier = Modifier.size(18.dp)
                 )
             }

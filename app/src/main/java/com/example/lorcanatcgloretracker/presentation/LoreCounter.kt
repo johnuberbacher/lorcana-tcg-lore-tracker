@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -25,8 +28,11 @@ fun LoreCounter(
     onDecrease: () -> Unit,
     onIncrease: () -> Unit,
     soundPool: SoundPool,
-    soundGetLore: Int
+    soundGetLore: Int,
+    settingsViewModel: SettingsViewModel
 ) {
+    val selectedTheme by settingsViewModel.selectedTheme.collectAsState()
+
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = CenterVertically,
@@ -80,21 +86,21 @@ fun LoreCounter(
             Text(
                 text = "-",
                 fontFamily = MyFontFamily,
-                color = MyColors.secondary,
+                color = if (selectedTheme == "oled") Color.White else MyColors.secondary,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = "$count",
                 fontFamily = MyFontFamily,
-                color = MyColors.secondary,
+                color = if (selectedTheme == "oled") Color.White else MyColors.secondary,
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = "+",
                 fontFamily = MyFontFamily,
-                color = MyColors.secondary,
+                color = if (selectedTheme == "oled") Color.White else MyColors.secondary,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
