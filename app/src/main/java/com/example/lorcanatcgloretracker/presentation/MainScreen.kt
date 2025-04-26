@@ -40,11 +40,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import com.example.lorcanatcgloretracker.R
-import com.example.lorcanatcgloretracker.presentation.theme.MyColors
 import com.example.lorcanatcgloretracker.presentation.theme.MyFontFamily
+import com.example.lorcanatcgloretracker.presentation.theme.SecondaryColor
 
 @Composable
-fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel) {
+fun MainScreen(
+    onOpenSettings: () -> Unit,
+    onOpenGameover: (String) -> Unit, // Update this to take the winner string
+    settingsViewModel: SettingsViewModel
+) {
     val navController = rememberNavController()
     val selectedTheme by settingsViewModel.selectedTheme.collectAsState()
 
@@ -52,7 +56,7 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
     var leftCount by remember { mutableIntStateOf(0) }
     var rightCount by remember { mutableIntStateOf(0) }
 
-    var volume by remember { mutableFloatStateOf(1f) } // Volume from 0.0 to 1.0
+    var volume by remember { mutableFloatStateOf(1f) }
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
 
@@ -100,9 +104,7 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
             )
         }
 
-        Row(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Row(modifier = Modifier.fillMaxSize()) {
             // Left Half
             Box(
                 modifier = Modifier
@@ -114,7 +116,16 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                     count = leftCount,
                     maxCount = maxLoreCount,
                     onDecrease = { leftCount-- },
-                    onIncrease = { leftCount++ },
+                    onIncrease = {
+                        leftCount++
+                        if (leftCount >= maxLoreCount) {
+                            soundPool.play(soundGameWon, 1f, 1f, 1, 0, 1f)
+                            leftCount = 0
+                            rightCount = 0
+                            maxLoreCount = 20
+                            onOpenGameover("Player 1 Wins!")
+                        }
+                    },
                     soundPool = soundPool,
                     soundGetLore = soundGetLore,
                     settingsViewModel = settingsViewModel
@@ -140,7 +151,11 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                     onIncrease = {
                         rightCount++
                         if (rightCount >= maxLoreCount) {
+                            onOpenGameover("Player 2 Wins!")
                             soundPool.play(soundGameWon, 1f, 1f, 1, 0, 1f)
+                            leftCount = 0
+                            rightCount = 0
+                            maxLoreCount = 20
                         }
                     },
                     soundPool = soundPool,
@@ -149,7 +164,6 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                 )
             }
         }
-
 
         // Total Lore Count
         Box(
@@ -191,13 +205,12 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                             text = "$maxLoreCount",
                             textAlign = TextAlign.Center,
                             fontFamily = MyFontFamily,
-                            color = if (selectedTheme == "oled") Color.White else MyColors.secondary,
+                            color = if (selectedTheme == "oled") Color.White else SecondaryColor,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
-
             }
         }
 
@@ -225,7 +238,7 @@ fun MainScreen(onOpenSettings: () -> Unit, settingsViewModel: SettingsViewModel)
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Settings",
-                    tint = if (selectedTheme == "oled") Color.White else MyColors.secondary,
+                    tint = if (selectedTheme == "oled") Color.White else SecondaryColor,
                     modifier = Modifier.size(18.dp)
                 )
             }

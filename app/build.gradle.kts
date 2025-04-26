@@ -69,6 +69,8 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.compose.material)
 
+    implementation("androidx.compose.material:material-icons-extended")
+
     // implementation(libs.ambient)
     //implementation(libs.wear.ambient)
 }

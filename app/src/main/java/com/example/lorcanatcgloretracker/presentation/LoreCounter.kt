@@ -18,8 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.example.lorcanatcgloretracker.presentation.theme.MyColors
 import com.example.lorcanatcgloretracker.presentation.theme.MyFontFamily
+import com.example.lorcanatcgloretracker.presentation.theme.SecondaryColor
 
 @Composable
 fun LoreCounter(
@@ -86,21 +86,21 @@ fun LoreCounter(
             Text(
                 text = "-",
                 fontFamily = MyFontFamily,
-                color = if (selectedTheme == "oled") Color.White else MyColors.secondary,
+                color = if (selectedTheme == "oled") Color.White else SecondaryColor,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = "$count",
                 fontFamily = MyFontFamily,
-                color = if (selectedTheme == "oled") Color.White else MyColors.secondary,
+                color = if (selectedTheme == "oled") Color.White else SecondaryColor,
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = "+",
                 fontFamily = MyFontFamily,
-                color = if (selectedTheme == "oled") Color.White else MyColors.secondary,
+                color = if (selectedTheme == "oled") Color.White else SecondaryColor,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold
             )
