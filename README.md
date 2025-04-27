@@ -1,5 +1,7 @@
 # Lorcana TCG Lore Tracker
 
+![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)
+
 A minimal Wear OS app built in Kotlin to help players track scores in the card game **Lorcana**.
 
 Instead of using physical dice or counters, this app provides a quick and accessible way to keep
