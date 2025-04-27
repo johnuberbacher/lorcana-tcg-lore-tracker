@@ -1,3 +1,4 @@
+// MainActivity.kt
 package com.example.lorcanatcgloretracker.presentation
 
 import android.Manifest

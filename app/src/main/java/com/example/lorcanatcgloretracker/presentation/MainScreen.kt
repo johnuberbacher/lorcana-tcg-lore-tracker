@@ -1,6 +1,8 @@
 package com.example.lorcanatcgloretracker.presentation
 
 import android.media.SoundPool
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,15 +17,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +40,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.rememberNavController
 import com.example.lorcanatcgloretracker.R
 import com.example.lorcanatcgloretracker.presentation.theme.MyFontFamily
 import com.example.lorcanatcgloretracker.presentation.theme.SecondaryColor
@@ -46,35 +47,23 @@ import com.example.lorcanatcgloretracker.presentation.theme.SecondaryColor
 @Composable
 fun MainScreen(
     onOpenSettings: () -> Unit,
-    onOpenGameover: (String) -> Unit, // Update this to take the winner string
+    onOpenGameover: (String) -> Unit,
     settingsViewModel: SettingsViewModel
 ) {
-    val navController = rememberNavController()
     val selectedTheme by settingsViewModel.selectedTheme.collectAsState()
 
     var maxLoreCount by remember { mutableIntStateOf(20) }
     var leftCount by remember { mutableIntStateOf(0) }
     var rightCount by remember { mutableIntStateOf(0) }
+    var isGameOver by remember { mutableStateOf(false) }
 
-    var volume by remember { mutableFloatStateOf(1f) }
     val context = LocalContext.current
-    val colors = MaterialTheme.colorScheme
-
-    // Setup SoundPool
-    val soundPool = remember {
-        SoundPool.Builder().setMaxStreams(2).build()
-    }
-
-    val soundGetLore = remember {
-        soundPool.load(context, R.raw.get_lore, 1)
-    }
-
-    val soundGameWon = remember {
-        soundPool.load(context, R.raw.game_complete, 1)
-    }
+    rememberCoroutineScope()
+    val soundPool = remember { SoundPool.Builder().setMaxStreams(2).build() }
+    val soundGetLore = remember { soundPool.load(context, R.raw.get_lore, 1) }
+    remember { soundPool.load(context, R.raw.game_complete, 1) }
 
     val loreValues = listOf(20, 25, 10, 15)
-
     var loreIndex by remember { mutableIntStateOf(0) }
 
     fun cycleMaxLoreCount() {
@@ -82,11 +71,7 @@ fun MainScreen(
         maxLoreCount = loreValues[loreIndex]
     }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            soundPool.release()
-        }
-    }
+    DisposableEffect(Unit) { onDispose { soundPool.release() } }
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (selectedTheme == "image") {
@@ -105,7 +90,6 @@ fun MainScreen(
         }
 
         Row(modifier = Modifier.fillMaxSize()) {
-            // Left Half
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -115,15 +99,32 @@ fun MainScreen(
                 LoreCounter(
                     count = leftCount,
                     maxCount = maxLoreCount,
-                    onDecrease = { leftCount-- },
+                    onDecrease = {
+                        if (!isGameOver) {
+                            leftCount--
+                        }
+                    },
                     onIncrease = {
-                        leftCount++
-                        if (leftCount >= maxLoreCount) {
-                            soundPool.play(soundGameWon, 1f, 1f, 1, 0, 1f)
-                            leftCount = 0
-                            rightCount = 0
-                            maxLoreCount = 20
-                            onOpenGameover("Player 1 Wins!")
+                        if (!isGameOver && leftCount < maxLoreCount) {
+                            leftCount++
+                            if (leftCount >= maxLoreCount) {
+                                isGameOver = true
+
+                                // Add a 1-second delay before calling onOpenGameover
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    onOpenGameover("Player 1 Wins!")
+
+                                    // Add another 1-second delay before resetting leftCount
+                                    Handler(Looper.getMainLooper()).postDelayed({
+                                        leftCount = 0
+                                        rightCount = 0
+                                        maxLoreCount = 20
+
+                                        // Reset game state
+                                        isGameOver = false
+                                    }, 500)  // 1000 milliseconds = 1 second
+                                }, 500)  // 500 milliseconds delay before gameover
+                            }
                         }
                     },
                     soundPool = soundPool,
@@ -132,30 +133,45 @@ fun MainScreen(
                 )
             }
 
-            // Right Half
             Box(
                 modifier = Modifier
                     .background(
-                        if (selectedTheme == "dark") Color.White.copy(alpha = 0.033f)
-                        else if (selectedTheme == "oled") Color.White.copy(alpha = 0.0f)
-                        else Color.Black.copy(alpha = 0.25f)
+                        if (selectedTheme == "dark") Color.White.copy(alpha = 0.033f) else if (selectedTheme == "oled") Color.White.copy(
+                            alpha = 0.0f
+                        ) else Color.Black.copy(alpha = 0.25f)
                     )
                     .weight(1f)
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
+                    .fillMaxHeight(), contentAlignment = Alignment.Center
             ) {
                 LoreCounter(
                     count = rightCount,
                     maxCount = maxLoreCount,
-                    onDecrease = { rightCount-- },
+                    onDecrease = {
+                        if (!isGameOver) {
+                            rightCount--
+                        }
+                    },
                     onIncrease = {
-                        rightCount++
-                        if (rightCount >= maxLoreCount) {
-                            onOpenGameover("Player 2 Wins!")
-                            soundPool.play(soundGameWon, 1f, 1f, 1, 0, 1f)
-                            leftCount = 0
-                            rightCount = 0
-                            maxLoreCount = 20
+                        if (!isGameOver && rightCount < maxLoreCount) {
+                            rightCount++
+                            if (rightCount >= maxLoreCount) {
+                                isGameOver = true
+
+                                // Add a 1-second delay before calling onOpenGameover
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    onOpenGameover("Player 2 Wins!")
+
+                                    // Add another 1-second delay before resetting leftCount
+                                    Handler(Looper.getMainLooper()).postDelayed({
+                                        leftCount = 0
+                                        rightCount = 0
+                                        maxLoreCount = 20
+
+                                        // Reset game state
+                                        isGameOver = false
+                                    }, 500)  // 1000 milliseconds = 1 second
+                                }, 500)  // 500 milliseconds delay before gameover
+                            }
                         }
                     },
                     soundPool = soundPool,
@@ -165,74 +181,52 @@ fun MainScreen(
             }
         }
 
-        // Total Lore Count
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.TopCenter
-        ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             Box(
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .clip(CircleShape)
                     .background(
-                        if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f)
-                        else if (selectedTheme == "oled") Color.White.copy(alpha = 0.0f)
-                        else Color.Black.copy(alpha = 0.33f)
+                        if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f) else if (selectedTheme == "oled") Color.White.copy(
+                            alpha = 0.0f
+                        ) else Color.Black.copy(alpha = 0.33f)
                     )
-                    .clickable(
-                        onClick = { cycleMaxLoreCount() },
-                    )
+                    .clickable(onClick = { cycleMaxLoreCount() })
                     .padding(horizontal = 8.dp)
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(3.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.lore_gold),
-                            contentDescription = "bar action image",
-                            modifier = Modifier
-                                .size(15.dp), // image height,
-                            tint = if (selectedTheme == "oled") Color.White else Color.Unspecified
-                        )
-                    }
-                    Box(
-                        modifier = Modifier.padding(bottom = 1.dp)
-                    ) {
-                        Text(
-                            text = "$maxLoreCount",
-                            textAlign = TextAlign.Center,
-                            fontFamily = MyFontFamily,
-                            color = if (selectedTheme == "oled") Color.White else SecondaryColor,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.lore_gold),
+                        contentDescription = "bar action image",
+                        modifier = Modifier.size(15.dp),
+                        tint = if (selectedTheme == "oled") Color.White else Color.Unspecified
+                    )
+                    Text(
+                        text = "$maxLoreCount",
+                        textAlign = TextAlign.Center,
+                        fontFamily = MyFontFamily,
+                        color = if (selectedTheme == "oled") Color.White else SecondaryColor,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
 
-        // Settings Icon - Bottom Center (unchanged)
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
-        ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Box(
                 modifier = Modifier
                     .padding(bottom = 8.dp)
                     .clip(CircleShape)
                     .background(
-                        if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f)
-                        else if (selectedTheme == "oled") Color.White.copy(alpha = 0.0f)
-                        else Color.Black.copy(alpha = 0.33f)
+                        if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f) else if (selectedTheme == "oled") Color.White.copy(
+                            alpha = 0.0f
+                        ) else Color.Black.copy(alpha = 0.33f)
                     )
-                    .clickable(
-                        onClick = { onOpenSettings() },
-                        role = null // You can add Role.Button if this is a button
-                    )
+                    .clickable(onClick = { onOpenSettings() })
                     .padding(4.dp)
             ) {
                 Icon(

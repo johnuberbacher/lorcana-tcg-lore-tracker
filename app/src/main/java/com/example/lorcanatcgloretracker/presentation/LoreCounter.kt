@@ -32,6 +32,7 @@ fun LoreCounter(
     settingsViewModel: SettingsViewModel
 ) {
     val selectedTheme by settingsViewModel.selectedTheme.collectAsState()
+    val muted by settingsViewModel.muted.collectAsState()
 
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -49,7 +50,9 @@ fun LoreCounter(
                 .fillMaxWidth()
                 .clickable {
                     if (count > 0) {
-                        soundPool.play(soundGetLore, 1f, 1f, 1, 0, 1f)
+                        if (!muted) {
+                            soundPool.play(soundGetLore, 1f, 1f, 1, 0, 1f)
+                        }
                         onDecrease()
                     }
                 }
@@ -63,7 +66,9 @@ fun LoreCounter(
                 .fillMaxWidth()
                 .clickable {
                     if (count < maxCount) {
-                        soundPool.play(soundGetLore, 1f, 1f, 1, 0, 1f)
+                        if (!muted) {
+                            soundPool.play(soundGetLore, 1f, 1f, 1, 0, 1f)
+                        }
                         onIncrease()
                     }
                 }

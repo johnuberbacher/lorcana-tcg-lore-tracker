@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.compose.material)
 
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     // implementation(libs.ambient)
     //implementation(libs.wear.ambient)
