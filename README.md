@@ -14,6 +14,7 @@ track of lore points directly on your watch.
 - [x] Dark/OLED-friendly theme
 - [x] Tile and complication support for Wear OS
 - [x] Built with Jetpack Compose and Material 3
+- [x] Option to mute sound effects
 
 ---
 
@@ -21,7 +22,6 @@ track of lore points directly on your watch.
 
 - [ ] Customizable background images
 - [ ] Save score screen as an image
-- [ ] Option to mute sound effects
 
 ---
 
