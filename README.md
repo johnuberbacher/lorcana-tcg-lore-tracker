@@ -17,13 +17,13 @@ track of lore points directly on your watch.
 - [x] Tile and complication support for Wear OS
 - [x] Built with Jetpack Compose and Material 3
 - [x] Option to mute sound effects
+- [x] Save score screen to device as an image
 
 ---
 
 ## Planned Features
 
 - [ ] Customizable background images
-- [ ] Save score screen as an image
 
 ---
 
