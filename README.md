@@ -42,12 +42,42 @@ track of lore points directly on your watch.
 
 ---
 
-## License
+## Building & Installing Locally
 
-MIT – free to use and modify.
+Follow these steps to build the app locally and install it on a connected Wear OS device or emulator using `adb`.
 
----
+1. Clone the Repository
 
-## Credits
+```bash
+git clone https://github.com/yourusername/lorcana-tcg-tracker.git
+cd lorcana-tcg-tracker
+```
 
-Made for fans of Lorcana who want a smoother way to track the game on the go.
+2. Build the APK
+
+Use Gradle to build the debug APK:
+
+```bash
+./gradlew assembleDebug
+```
+
+After building, you'll find the APK at:
+
+```
+app/build/outputs/apk/debug/app-debug.apk
+```
+
+3. Connect Your Wear OS Device or Start an Emulator
+
+- Ensure **USB debugging** is enabled on your Wear OS device.
+- Check that your device is recognized:
+
+```bash
+adb devices
+```
+
+4. Install the APK via ADB
+
+```bash
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
