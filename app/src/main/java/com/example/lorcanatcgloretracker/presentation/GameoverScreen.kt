@@ -1,10 +1,11 @@
 // GameoverScreen.kt
 package com.example.lorcanatcgloretracker.presentation
 
+import android.Manifest
 import android.app.Activity
 import android.content.ContentValues
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Rect
 import android.media.MediaScannerConnection
 import android.media.SoundPool
 import android.os.Build
@@ -12,7 +13,6 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.view.PixelCopy
-import android.view.Window
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -45,6 +46,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
 import com.example.lorcanatcgloretracker.R
 import com.example.lorcanatcgloretracker.presentation.theme.DarkestColor
@@ -52,17 +55,14 @@ import com.example.lorcanatcgloretracker.presentation.theme.MyFontFamily
 import com.example.lorcanatcgloretracker.presentation.theme.SecondaryColor
 
 fun takeScreenshot(activity: Activity, onResult: (Boolean) -> Unit) {
-    val window: Window = activity.window
+    val window = activity.window
     val view = window.decorView.rootView
     val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val location = IntArray(2)
-        view.getLocationInWindow(location)
         try {
             PixelCopy.request(
                 window,
-                Rect(location[0], location[1], location[0] + view.width, location[1] + view.height),
                 bitmap,
                 { result ->
                     if (result == PixelCopy.SUCCESS) {
@@ -79,10 +79,11 @@ fun takeScreenshot(activity: Activity, onResult: (Boolean) -> Unit) {
             onResult(false)
         }
     } else {
-        view.isDrawingCacheEnabled = true
-        val cache = Bitmap.createBitmap(view.drawingCache)
-        view.isDrawingCacheEnabled = false
-        saveBitmap(activity, cache)
+        // Safe legacy fallback
+        val legacyBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(legacyBitmap)
+        view.draw(canvas)
+        saveBitmap(activity, legacyBitmap)
         onResult(true)
     }
 }
@@ -116,7 +117,7 @@ fun saveBitmap(activity: Activity, bitmap: Bitmap) {
         // Notify media scanner
         MediaScannerConnection.scanFile(
             activity,
-            arrayOf(uri.toString()),
+            arrayOf("/storage/emulated/0/Pictures/Screenshots/$filename"),
             arrayOf("image/png"),
             null
         )
@@ -212,7 +213,7 @@ fun GameoverScreen(
                     )
                 }
                 // Right Button: Save/Download Icon
-                /* Button(
+                Button(
                     onClick = {
                         activity?.let { act ->
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -269,7 +270,14 @@ fun GameoverScreen(
                                 }
                             }
                         }
-                    }
+                    },
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selectedTheme == "oled") Color.White else SecondaryColor,
+                        contentColor = if (selectedTheme == "oled") Color.Black else DarkestColor
+                    ),
+                    modifier = Modifier.size(40.dp),
+                    contentPadding = PaddingValues(0.dp)
                 )
                 {
                     Icon(
@@ -278,7 +286,7 @@ fun GameoverScreen(
                         tint = if (selectedTheme == "oled") Color.Black else DarkestColor,
                         modifier = Modifier.size(24.dp)
                     )
-                } */
+                }
             }
         }
     }
