@@ -4,10 +4,12 @@ package com.example.lorcanatcgloretracker.presentation
 import android.Manifest
 import android.app.Activity
 import android.content.ContentValues
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.media.MediaScannerConnection
 import android.media.SoundPool
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -27,6 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -88,16 +91,16 @@ fun takeScreenshot(activity: Activity, onResult: (Boolean) -> Unit) {
     }
 }
 
-fun saveBitmap(activity: Activity, bitmap: Bitmap) {
+fun saveBitmap(activity: Activity, bitmap: Bitmap): Uri? {
     val filename = "screenshot_${System.currentTimeMillis()}.png"
     val resolver = activity.contentResolver
     val contentValues = ContentValues().apply {
         put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
         put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Screenshots") // Scoped storage
+            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Screenshots")
         } else {
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "Screenshots") // Legacy
+            put(MediaStore.MediaColumns.RELATIVE_PATH, "Screenshots")
         }
         put(MediaStore.Images.Media.IS_PENDING, 1)
     }
@@ -105,8 +108,7 @@ fun saveBitmap(activity: Activity, bitmap: Bitmap) {
     val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
     imageUri?.let { uri ->
-        val fos = resolver.openOutputStream(uri)
-        fos?.use {
+        resolver.openOutputStream(uri)?.use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
         }
 
@@ -114,7 +116,6 @@ fun saveBitmap(activity: Activity, bitmap: Bitmap) {
         contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
         resolver.update(uri, contentValues, null, null)
 
-        // Notify media scanner
         MediaScannerConnection.scanFile(
             activity,
             arrayOf("/storage/emulated/0/Pictures/Screenshots/$filename"),
@@ -122,8 +123,39 @@ fun saveBitmap(activity: Activity, bitmap: Bitmap) {
             null
         )
     } ?: run {
-        // Fallback if uri is null
         Toast.makeText(activity, "Failed to save screenshot", Toast.LENGTH_SHORT).show()
+    }
+
+    return imageUri
+}
+
+fun shareScreenshot(activity: Activity) {
+    val window = activity.window
+    val view = window.decorView.rootView
+    val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+
+    fun doShare(bmp: Bitmap) {
+        val uri = saveBitmap(activity, bmp) ?: return
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        activity.startActivity(Intent.createChooser(shareIntent, "Share game result"))
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        try {
+            PixelCopy.request(window, bitmap, { result ->
+                if (result == PixelCopy.SUCCESS) doShare(bitmap)
+            }, Handler(Looper.getMainLooper()))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    } else {
+        val canvas = android.graphics.Canvas(bitmap)
+        view.draw(canvas)
+        doShare(bitmap)
     }
 }
 
@@ -212,29 +244,19 @@ fun GameoverScreen(
                         modifier = Modifier.size(24.dp)
                     )
                 }
-                // Right Button: Save/Download Icon
+                // Save button
                 Button(
                     onClick = {
                         activity?.let { act ->
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                // Android Q+ don't need WRITE_EXTERNAL_STORAGE permission for saving in MediaStore
                                 takeScreenshot(act) { success ->
-                                    if (success) {
-                                        Toast.makeText(
-                                            context,
-                                            "Screenshot saved",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Failed to save screenshot",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                    Toast.makeText(
+                                        context,
+                                        if (success) "Screenshot saved" else "Failed to save screenshot",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             } else {
-                                // For devices below Android Q, ensure WRITE_EXTERNAL_STORAGE permission is checked
                                 if (ContextCompat.checkSelfPermission(
                                         context,
                                         Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -252,21 +274,12 @@ fun GameoverScreen(
                                     ).show()
                                     return@let
                                 }
-                                // Proceed with screenshot
                                 takeScreenshot(act) { success ->
-                                    if (success) {
-                                        Toast.makeText(
-                                            context,
-                                            "Screenshot saved",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Failed to save screenshot",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                    Toast.makeText(
+                                        context,
+                                        if (success) "Screenshot saved" else "Failed to save screenshot",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
                         }
@@ -278,11 +291,28 @@ fun GameoverScreen(
                     ),
                     modifier = Modifier.size(40.dp),
                     contentPadding = PaddingValues(0.dp)
-                )
-                {
+                ) {
                     Icon(
                         imageVector = Icons.Default.Save,
                         contentDescription = "Save Icon",
+                        tint = if (selectedTheme == "oled") Color.Black else DarkestColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                // Share button
+                Button(
+                    onClick = { activity?.let { shareScreenshot(it) } },
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selectedTheme == "oled") Color.White else SecondaryColor,
+                        contentColor = if (selectedTheme == "oled") Color.Black else DarkestColor
+                    ),
+                    modifier = Modifier.size(40.dp),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = "Share Icon",
                         tint = if (selectedTheme == "oled") Color.Black else DarkestColor,
                         modifier = Modifier.size(24.dp)
                     )

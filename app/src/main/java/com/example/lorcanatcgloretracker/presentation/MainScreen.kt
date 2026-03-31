@@ -22,11 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,25 +48,16 @@ fun MainScreen(
     settingsViewModel: SettingsViewModel
 ) {
     val selectedTheme by settingsViewModel.selectedTheme.collectAsState()
-
-    var maxLoreCount by remember { mutableIntStateOf(20) }
-    var leftCount by remember { mutableIntStateOf(0) }
-    var rightCount by remember { mutableIntStateOf(0) }
-    var isGameOver by remember { mutableStateOf(false) }
+    val leftCount by settingsViewModel.leftCount.collectAsState()
+    val rightCount by settingsViewModel.rightCount.collectAsState()
+    val maxLoreCount by settingsViewModel.maxLoreCount.collectAsState()
+    val isGameOver by settingsViewModel.isGameOver.collectAsState()
 
     val context = LocalContext.current
     rememberCoroutineScope()
     val soundPool = remember { SoundPool.Builder().setMaxStreams(2).build() }
     val soundGetLore = remember { soundPool.load(context, R.raw.get_lore, 1) }
     remember { soundPool.load(context, R.raw.game_complete, 1) }
-
-    val loreValues = listOf(20, 25, 10, 15)
-    var loreIndex by remember { mutableIntStateOf(0) }
-
-    fun cycleMaxLoreCount() {
-        loreIndex = (loreIndex + 1) % loreValues.size
-        maxLoreCount = loreValues[loreIndex]
-    }
 
     DisposableEffect(Unit) { onDispose { soundPool.release() } }
 
@@ -101,29 +89,22 @@ fun MainScreen(
                     maxCount = maxLoreCount,
                     onDecrease = {
                         if (!isGameOver) {
-                            leftCount--
+                            settingsViewModel.decrementLeft()
                         }
                     },
                     onIncrease = {
                         if (!isGameOver && leftCount < maxLoreCount) {
-                            leftCount++
-                            if (leftCount >= maxLoreCount) {
-                                isGameOver = true
+                            settingsViewModel.incrementLeft()
+                            if (leftCount + 1 >= maxLoreCount) {
+                                settingsViewModel.setGameOver(true)
 
-                                // Add a 1-second delay before calling onOpenGameover
                                 Handler(Looper.getMainLooper()).postDelayed({
                                     onOpenGameover("Player 1 Wins!")
 
-                                    // Add another 1-second delay before resetting leftCount
                                     Handler(Looper.getMainLooper()).postDelayed({
-                                        leftCount = 0
-                                        rightCount = 0
-                                        maxLoreCount = 20
-
-                                        // Reset game state
-                                        isGameOver = false
-                                    }, 500)  // 1000 milliseconds = 1 second
-                                }, 500)  // 500 milliseconds delay before gameover
+                                        settingsViewModel.resetGame()
+                                    }, 500)
+                                }, 500)
                             }
                         }
                     },
@@ -148,29 +129,22 @@ fun MainScreen(
                     maxCount = maxLoreCount,
                     onDecrease = {
                         if (!isGameOver) {
-                            rightCount--
+                            settingsViewModel.decrementRight()
                         }
                     },
                     onIncrease = {
                         if (!isGameOver && rightCount < maxLoreCount) {
-                            rightCount++
-                            if (rightCount >= maxLoreCount) {
-                                isGameOver = true
+                            settingsViewModel.incrementRight()
+                            if (rightCount + 1 >= maxLoreCount) {
+                                settingsViewModel.setGameOver(true)
 
-                                // Add a 1-second delay before calling onOpenGameover
                                 Handler(Looper.getMainLooper()).postDelayed({
                                     onOpenGameover("Player 2 Wins!")
 
-                                    // Add another 1-second delay before resetting leftCount
                                     Handler(Looper.getMainLooper()).postDelayed({
-                                        leftCount = 0
-                                        rightCount = 0
-                                        maxLoreCount = 20
-
-                                        // Reset game state
-                                        isGameOver = false
-                                    }, 500)  // 1000 milliseconds = 1 second
-                                }, 500)  // 500 milliseconds delay before gameover
+                                        settingsViewModel.resetGame()
+                                    }, 500)
+                                }, 500)
                             }
                         }
                     },
@@ -191,7 +165,7 @@ fun MainScreen(
                             alpha = 0.0f
                         ) else Color.Black.copy(alpha = 0.33f)
                     )
-                    .clickable(onClick = { cycleMaxLoreCount() })
+                    .clickable(onClick = { settingsViewModel.cycleMaxLoreCount() })
                     .padding(horizontal = 8.dp)
             ) {
                 Row(

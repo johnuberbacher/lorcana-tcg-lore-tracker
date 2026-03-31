@@ -1,10 +1,5 @@
 <resources>
-    <string name="app_name">Lorcana TCG Lore Tracker</string>
-    <!--
-    This string is used for square devices and overridden by hello_world in
-    values-round/strings.xml for round devices.
-    -->
-    <string name="hello_world">From the Square world,\nHello, %1$s!</string>
-    <string name="tile_label">Example tile</string>
-    <string name="complication_label">Example complication</string>
+    <string name="app_name">Lorcana Lore Tracker</string>
+    <string name="tile_label">Lorcana Lore Tracker</string>
+    <string name="complication_label">Lorcana Lore Tracker Shortcut</string>
 </resources>

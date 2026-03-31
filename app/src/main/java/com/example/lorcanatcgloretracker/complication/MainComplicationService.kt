@@ -1,41 +1,46 @@
 package com.example.lorcanatcgloretracker.complication
 
+import android.app.PendingIntent
+import android.content.Intent
+import android.graphics.drawable.Icon
 import androidx.wear.watchface.complications.data.ComplicationData
 import androidx.wear.watchface.complications.data.ComplicationType
+import androidx.wear.watchface.complications.data.MonochromaticImage
 import androidx.wear.watchface.complications.data.PlainComplicationText
 import androidx.wear.watchface.complications.data.ShortTextComplicationData
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
-import java.util.Calendar
+import com.example.lorcanatcgloretracker.R
+import com.example.lorcanatcgloretracker.presentation.MainActivity
 
-/**
- * Skeleton for complication data source that returns short text.
- */
 class MainComplicationService : SuspendingComplicationDataSourceService() {
 
     override fun getPreviewData(type: ComplicationType): ComplicationData? {
-        if (type != ComplicationType.SHORT_TEXT) {
-            return null
-        }
-        return createComplicationData("Mon", "Monday")
+        if (type != ComplicationType.SHORT_TEXT) return null
+        return buildComplicationData(tapAction = null)
     }
 
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData {
-        return when (Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) {
-            Calendar.SUNDAY -> createComplicationData("Sun", "Sunday")
-            Calendar.MONDAY -> createComplicationData("Mon", "Monday")
-            Calendar.TUESDAY -> createComplicationData("Tue", "Tuesday")
-            Calendar.WEDNESDAY -> createComplicationData("Wed", "Wednesday")
-            Calendar.THURSDAY -> createComplicationData("Thu", "Thursday")
-            Calendar.FRIDAY -> createComplicationData("Fri!", "Friday!")
-            Calendar.SATURDAY -> createComplicationData("Sat", "Saturday")
-            else -> throw IllegalArgumentException("too many days")
-        }
+        return buildComplicationData(tapAction = createLaunchIntent())
     }
 
-    private fun createComplicationData(text: String, contentDescription: String) =
+    private fun createLaunchIntent(): PendingIntent {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+    }
+
+    private fun buildComplicationData(tapAction: PendingIntent?) =
         ShortTextComplicationData.Builder(
-            text = PlainComplicationText.Builder(text).build(),
-            contentDescription = PlainComplicationText.Builder(contentDescription).build()
-        ).build()
+            text = PlainComplicationText.Builder("Lore").build(),
+            contentDescription = PlainComplicationText.Builder("Open Lorcana Lore Tracker").build()
+        ).apply {
+            setMonochromaticImage(
+                MonochromaticImage.Builder(
+                    Icon.createWithResource(this@MainComplicationService, R.drawable.lore_gold)
+                ).build()
+            )
+            tapAction?.let { setTapAction(it) }
+        }.build()
 }

@@ -13,14 +13,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.lorcanatcgloretracker.presentation.theme.LorcanaTCGLoreTrackerTheme
 import androidx.compose.runtime.Composable
 import androidx.core.content.ContextCompat
 import androidx.core.view.drawToBitmap
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.wear.compose.navigation.composable
+import androidx.wear.compose.navigation.SwipeDismissableNavHost
+import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import java.io.IOException
 
 class MainActivity : ComponentActivity() {
@@ -38,10 +38,11 @@ class MainActivity : ComponentActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
         setContent {
-            MaterialTheme(colorScheme = lightColorScheme()) {
+            LorcanaTCGLoreTrackerTheme {
                 WearApp(settingsViewModel)
             }
         }
@@ -127,9 +128,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun WearApp(settingsViewModel: SettingsViewModel) {
-    val navController = rememberNavController()
+    val navController = rememberSwipeDismissableNavController()
 
-    NavHost(navController = navController, startDestination = "main") {
+    SwipeDismissableNavHost(navController = navController, startDestination = "main") {
         composable("main") {
             MainScreen(
                 onOpenSettings = { navController.navigate("settings") },
@@ -140,10 +141,7 @@ fun WearApp(settingsViewModel: SettingsViewModel) {
             )
         }
         composable("settings") {
-            SettingsScreen(
-                onBack = { navController.popBackStack() },
-                settingsViewModel = settingsViewModel
-            )
+            SettingsScreen(settingsViewModel = settingsViewModel)
         }
         composable("gameover/{winner}") { backStackEntry ->
             val winner = backStackEntry.arguments?.getString("winner") ?: "Unknown"

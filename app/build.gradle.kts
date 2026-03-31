@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.example.lorcanatcgloretracker"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.lorcanatcgloretracker"
         minSdk = 30
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }
@@ -35,6 +35,8 @@ android {
     buildFeatures {
         compose = true
     }
+    ndkVersion = "27.1.12297006"
+    buildToolsVersion = "35.0.0"
 }
 
 dependencies {
@@ -43,8 +45,8 @@ dependencies {
     implementation(libs.ui)
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
-    implementation(libs.compose.material)  // For Material 2 (if you still need it)
     implementation(libs.compose.foundation)
+    implementation(libs.wear.compose.material3)
     implementation(libs.wear.tooling.preview)
     implementation(libs.activity.compose)
     implementation(libs.core.splashscreen)
@@ -67,7 +69,6 @@ dependencies {
 
     // Material3 Dependency
     implementation(libs.material3)
-    implementation(libs.compose.material)
 
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.datastore:datastore-preferences:1.0.0")

@@ -1,228 +1,131 @@
 // SettingsScreen.kt
 package com.example.lorcanatcgloretracker.presentation
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
-import androidx.wear.compose.foundation.lazy.ScalingLazyColumnDefaults
-import androidx.wear.compose.foundation.lazy.ScalingLazyListAnchorType
-import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
-import androidx.wear.compose.material.PositionIndicator
-import androidx.wear.compose.material.RadioButton
-import androidx.wear.compose.material.Scaffold
-import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.ToggleChip
-import com.example.lorcanatcgloretracker.R
-import com.example.lorcanatcgloretracker.presentation.theme.DarkestColor
-import com.example.lorcanatcgloretracker.presentation.theme.SecondaryColor
+import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
+import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
+import androidx.wear.compose.material3.ListHeader
+import androidx.wear.compose.material3.RadioButton
+import androidx.wear.compose.material3.RadioButtonDefaults
+import androidx.wear.compose.material3.ScreenScaffold
+import androidx.wear.compose.material3.SurfaceTransformation
+import androidx.wear.compose.material3.SwitchButton
+import androidx.wear.compose.material3.SwitchButtonDefaults
+import androidx.wear.compose.material3.Text
+import androidx.wear.compose.material3.lazy.rememberTransformationSpec
+import androidx.wear.compose.material3.lazy.transformedHeight
 
 @Composable
-fun SettingsScreen(onBack: () -> Unit, settingsViewModel: SettingsViewModel) {
+fun SettingsScreen(settingsViewModel: SettingsViewModel) {
     val selectedTheme by settingsViewModel.selectedTheme.collectAsState()
     val muted by settingsViewModel.muted.collectAsState()
 
-    val scrollState = rememberScalingLazyListState()
+    val listState = rememberTransformingLazyColumnState()
+    val spec = rememberTransformationSpec()
 
-    LaunchedEffect(scrollState) {
-        scrollState.scrollToItem(0) // Ensure scroll to top on load
-    }
-
-    Scaffold(
+    ScreenScaffold(
+        scrollState = listState,
         modifier = Modifier.fillMaxSize(),
-        positionIndicator = { PositionIndicator(scalingLazyListState = scrollState) }
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (selectedTheme == "image") {
-                Image(
-                    painter = painterResource(id = R.drawable.image_background),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Box(
+        timeText = {}
+    ) { contentPadding ->
+        TransformingLazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = contentPadding
+        ) {
+            item {
+                ListHeader(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black)
+                        .fillMaxWidth()
+                        .transformedHeight(this, spec),
+                    transformation = SurfaceTransformation(spec)
+                ) {
+                    Text("Theme Style")
+                }
+            }
+            item {
+                RadioButton(
+                    selected = selectedTheme == "image",
+                    onSelect = { settingsViewModel.setTheme("image") },
+                    label = { Text("Image") },
+                    colors = RadioButtonDefaults.radioButtonColors(
+                        selectedContainerColor = Color(0xFF373B70),
+                        unselectedContainerColor = Color(0xFF1C1C1A),
+                    ),
+                    transformation = SurfaceTransformation(spec),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .transformedHeight(this, spec)
                 )
             }
-            ScalingLazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                state = scrollState,
-                flingBehavior = ScalingLazyColumnDefaults.snapFlingBehavior(state = scrollState),
-                anchorType = ScalingLazyListAnchorType.ItemStart
-            ) {
-                item { ThemeSettings(selectedTheme, settingsViewModel) }
-                item { SoundSettings(muted, settingsViewModel) }
-                item { BackButton(onBack, selectedTheme) }
+            item {
+                RadioButton(
+                    selected = selectedTheme == "dark",
+                    onSelect = { settingsViewModel.setTheme("dark") },
+                    label = { Text("Dark") },
+                    colors = RadioButtonDefaults.radioButtonColors(
+                        selectedContainerColor = Color(0xFF373B70),
+                        unselectedContainerColor = Color(0xFF1C1C1A),
+                    ),
+                    transformation = SurfaceTransformation(spec),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .transformedHeight(this, spec)
+                )
+            }
+            item {
+                RadioButton(
+                    selected = selectedTheme == "oled",
+                    onSelect = { settingsViewModel.setTheme("oled") },
+                    label = { Text("OLED") },
+                    colors = RadioButtonDefaults.radioButtonColors(
+                        selectedContainerColor = Color(0xFF373B70),
+                        unselectedContainerColor = Color(0xFF1C1C1A),
+                    ),
+                    transformation = SurfaceTransformation(spec),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .transformedHeight(this, spec)
+                )
+            }
+            item {
+                ListHeader(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .transformedHeight(this, spec),
+                    transformation = SurfaceTransformation(spec)
+                ) {
+                    Text("Sound")
+                }
+            }
+            item {
+                SwitchButton(
+                    checked = muted,
+                    onCheckedChange = { settingsViewModel.setMuted(it) },
+                    label = { Text("Mute Sounds") },
+                    colors = SwitchButtonDefaults.switchButtonColors(
+                        checkedContainerColor = Color(0xFF373B70),
+                        uncheckedContainerColor = Color(0xFF1C1C1A),
+                    ),
+                    transformation = SurfaceTransformation(spec),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .transformedHeight(this, spec)
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
 }
 
-
-@Composable
-fun ThemeSettings(selectedTheme: String, settingsViewModel: SettingsViewModel) {
-    val isRound = LocalConfiguration.current.isScreenRound
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp)
-    ) {
-        Text(
-            "Theme Style",
-            style = MaterialTheme.typography.labelSmall,
-            textAlign = if (isRound) TextAlign.Center else TextAlign.Start,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 6.dp)
-        )
-        ThemeToggleChip(
-            label = "Image",
-            selected = selectedTheme == "image",
-            onClick = { settingsViewModel.setTheme("image") })
-        ThemeToggleChip(
-            label = "Dark",
-            selected = selectedTheme == "dark",
-            onClick = { settingsViewModel.setTheme("dark") })
-        ThemeToggleChip(
-            label = "OLED",
-            selected = selectedTheme == "oled",
-            onClick = { settingsViewModel.setTheme("oled") })
-    }
-}
-
-@Composable
-fun SoundSettings(muted: Boolean, settingsViewModel: SettingsViewModel) {
-    val isRound = LocalConfiguration.current.isScreenRound
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp)
-    ) {
-        Text(
-            "Sound",
-            style = MaterialTheme.typography.labelSmall,
-            textAlign = if (isRound) TextAlign.Center else TextAlign.Start,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 6.dp)
-        )
-        MuteSoundToggleChip(selected = muted, onClick = { settingsViewModel.setMuted(it) })
-    }
-}
-
-@Composable
-fun BackButton(onBack: () -> Unit, selectedTheme: String) {
-    Button(
-        modifier = Modifier
-            // .fillMaxWidth()
-            .padding(top = 16.dp),
-        onClick = onBack,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (selectedTheme == "oled") Color.White else SecondaryColor,
-            contentColor = if (selectedTheme == "oled") Color.Black else DarkestColor
-        )
-    ) {
-        Text("Back", color = if (selectedTheme == "oled") Color.Black else DarkestColor)
-    }
-}
-
-@Composable
-fun MuteSoundToggleChip(
-    selected: Boolean,
-    onClick: (Boolean) -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clip(CircleShape)
-            .background(
-                color = if (selected) {
-                    Color(0xFF373B70) // Solid color for selected
-                } else {
-                    Color(0xFF1C1C1A) // Solid color for unselected
-                }
-            )
-    ) {
-        // Use ToggleChip with a switch-like control
-        ToggleChip(
-            checked = selected,
-            onCheckedChange = { onClick(!selected) }, // Toggle the mute state
-            label = {
-                Text(
-                    text = "Mute Sounds",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            },
-            toggleControl = {
-                // Instead of RadioButton, use Switch for a more fitting behavior
-                androidx.wear.compose.material.Switch(
-                    checked = selected,
-                    onCheckedChange = { onClick(it) } // Toggling switch state
-                )
-            },
-            modifier = Modifier.fillMaxWidth() // Ensure the ToggleChip fills the Box
-        )
-    }
-}
-
-
-@Composable
-fun ThemeToggleChip(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    ToggleChip(
-        checked = selected,
-        onCheckedChange = { if (!selected) onClick() }, // Only allow changing if not already selected
-        label = {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        },
-        toggleControl = {
-            RadioButton(
-                selected = selected,
-                onClick = null
-            )
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clip(CircleShape)
-            .background(
-                color = if (selected) {
-                    Color(0xFF373B70) // Solid color for selected
-                } else {
-                    Color(0xFF1C1C1A) // Solid color for unselected
-                }
-            )
-    )
-}
