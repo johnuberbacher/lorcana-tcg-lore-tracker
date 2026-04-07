@@ -1,5 +1,5 @@
 // LoreCounter.kt
-package com.example.lorcanatcgloretracker.presentation
+package com.bluevolume.wearlorcanaloretracker.presentation
 
 import android.media.SoundPool
 import androidx.compose.foundation.clickable
@@ -18,8 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.example.lorcanatcgloretracker.presentation.theme.MyFontFamily
-import com.example.lorcanatcgloretracker.presentation.theme.SecondaryColor
+import com.bluevolume.wearlorcanaloretracker.presentation.theme.MyFontFamily
+import com.bluevolume.wearlorcanaloretracker.presentation.theme.SecondaryColor
 
 @Composable
 fun LoreCounter(

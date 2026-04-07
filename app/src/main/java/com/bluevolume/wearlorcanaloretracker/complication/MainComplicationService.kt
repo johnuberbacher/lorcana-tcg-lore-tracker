@@ -1,22 +1,23 @@
-package com.example.lorcanatcgloretracker.complication
+package com.bluevolume.wearlorcanaloretracker.complication
 
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Icon
 import androidx.wear.watchface.complications.data.ComplicationData
 import androidx.wear.watchface.complications.data.ComplicationType
-import androidx.wear.watchface.complications.data.MonochromaticImage
 import androidx.wear.watchface.complications.data.PlainComplicationText
-import androidx.wear.watchface.complications.data.ShortTextComplicationData
+import androidx.wear.watchface.complications.data.SmallImage
+import androidx.wear.watchface.complications.data.SmallImageComplicationData
+import androidx.wear.watchface.complications.data.SmallImageType
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
-import com.example.lorcanatcgloretracker.R
-import com.example.lorcanatcgloretracker.presentation.MainActivity
+import com.bluevolume.wearlorcanaloretracker.R
+import com.bluevolume.wearlorcanaloretracker.presentation.MainActivity
 
 class MainComplicationService : SuspendingComplicationDataSourceService() {
 
     override fun getPreviewData(type: ComplicationType): ComplicationData? {
-        if (type != ComplicationType.SHORT_TEXT) return null
+        if (type != ComplicationType.SMALL_IMAGE) return null
         return buildComplicationData(tapAction = null)
     }
 
@@ -32,15 +33,13 @@ class MainComplicationService : SuspendingComplicationDataSourceService() {
     }
 
     private fun buildComplicationData(tapAction: PendingIntent?) =
-        ShortTextComplicationData.Builder(
-            text = PlainComplicationText.Builder("Lore").build(),
+        SmallImageComplicationData.Builder(
+            smallImage = SmallImage.Builder(
+                image = Icon.createWithResource(this, R.mipmap.ic_launcher_foreground),
+                type = SmallImageType.PHOTO
+            ).build(),
             contentDescription = PlainComplicationText.Builder("Open Lorcana Lore Tracker").build()
         ).apply {
-            setMonochromaticImage(
-                MonochromaticImage.Builder(
-                    Icon.createWithResource(this@MainComplicationService, R.drawable.lore_gold)
-                ).build()
-            )
             tapAction?.let { setTapAction(it) }
         }.build()
 }

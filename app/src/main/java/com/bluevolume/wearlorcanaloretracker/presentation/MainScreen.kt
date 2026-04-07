@@ -1,4 +1,4 @@
-package com.example.lorcanatcgloretracker.presentation
+package com.bluevolume.wearlorcanaloretracker.presentation
 
 import android.media.SoundPool
 import android.os.Handler
@@ -9,11 +9,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -23,7 +25,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,9 +38,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.lorcanatcgloretracker.R
-import com.example.lorcanatcgloretracker.presentation.theme.MyFontFamily
-import com.example.lorcanatcgloretracker.presentation.theme.SecondaryColor
+import com.bluevolume.wearlorcanaloretracker.R
+import com.bluevolume.wearlorcanaloretracker.presentation.theme.MyFontFamily
+import com.bluevolume.wearlorcanaloretracker.presentation.theme.SecondaryColor
 
 @Composable
 fun MainScreen(
@@ -54,14 +55,15 @@ fun MainScreen(
     val isGameOver by settingsViewModel.isGameOver.collectAsState()
 
     val context = LocalContext.current
-    rememberCoroutineScope()
     val soundPool = remember { SoundPool.Builder().setMaxStreams(2).build() }
     val soundGetLore = remember { soundPool.load(context, R.raw.get_lore, 1) }
     remember { soundPool.load(context, R.raw.game_complete, 1) }
 
     DisposableEffect(Unit) { onDispose { soundPool.release() } }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
         if (selectedTheme == "image") {
             Image(
                 painter = painterResource(id = R.drawable.image_background),
@@ -158,34 +160,41 @@ fun MainScreen(
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             Box(
                 modifier = Modifier
-                    .padding(top = 8.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f) else if (selectedTheme == "oled") Color.White.copy(
-                            alpha = 0.0f
-                        ) else Color.Black.copy(alpha = 0.33f)
-                    )
-                    .clickable(onClick = { settingsViewModel.cycleMaxLoreCount() })
-                    .padding(horizontal = 8.dp)
+                    .padding(top = 0.dp)
+                    .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
+                    .clip(RoundedCornerShape(topStartPercent = 0, topEndPercent = 0, bottomEndPercent = 50, bottomStartPercent = 50))
+                    .clickable(onClick = { settingsViewModel.cycleMaxLoreCount() }),
+                contentAlignment = Alignment.Center
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(3.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(
+                            if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f) else if (selectedTheme == "oled") Color.White.copy(
+                                alpha = 0.0f
+                            ) else Color.Black.copy(alpha = 0.33f)
+                        )
+                        .padding(horizontal = 8.dp)
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.lore_gold),
-                        contentDescription = "bar action image",
-                        modifier = Modifier.size(15.dp),
-                        tint = if (selectedTheme == "oled") Color.White else Color.Unspecified
-                    )
-                    Text(
-                        text = "$maxLoreCount",
-                        textAlign = TextAlign.Center,
-                        fontFamily = MyFontFamily,
-                        color = if (selectedTheme == "oled") Color.White else SecondaryColor,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(3.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.lore_gold),
+                            contentDescription = "bar action image",
+                            modifier = Modifier.size(15.dp),
+                            tint = if (selectedTheme == "oled") Color.White else Color.Unspecified
+                        )
+                        Text(
+                            text = "$maxLoreCount",
+                            textAlign = TextAlign.Center,
+                            fontFamily = MyFontFamily,
+                            color = if (selectedTheme == "oled") Color.White else SecondaryColor,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
@@ -193,22 +202,29 @@ fun MainScreen(
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
             Box(
                 modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f) else if (selectedTheme == "oled") Color.White.copy(
-                            alpha = 0.0f
-                        ) else Color.Black.copy(alpha = 0.33f)
-                    )
-                    .clickable(onClick = { onOpenSettings() })
-                    .padding(4.dp)
+                    .padding(bottom = 0.dp)
+                    .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
+                    .clip(RoundedCornerShape(topStartPercent = 50, topEndPercent = 50, bottomEndPercent = 0, bottomStartPercent = 0))
+                    .clickable(onClick = { onOpenSettings() }),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = if (selectedTheme == "oled") Color.White else SecondaryColor,
-                    modifier = Modifier.size(18.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(
+                            if (selectedTheme == "dark") Color.White.copy(alpha = 0.1f) else if (selectedTheme == "oled") Color.White.copy(
+                                alpha = 0.0f
+                            ) else Color.Black.copy(alpha = 0.33f)
+                        )
+                        .padding(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings",
+                        tint = if (selectedTheme == "oled") Color.White else SecondaryColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }

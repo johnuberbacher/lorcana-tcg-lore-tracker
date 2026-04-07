@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Lorcana Lore Tracker</string>
     <string name="tile_label">Lorcana Lore Tracker</string>
-    <string name="complication_label">Lorcana Lore Tracker Shortcut</string>
+    <string name="complication_label">Lorcana Lore Tracker</string>
+    <string name="tile_main_text">Lorcana Lore Tracker</string>
+    <string name="screenshot_saved">Screenshot saved</string>
+    <string name="screenshot_failed">Failed to save screenshot</string>
 </resources>

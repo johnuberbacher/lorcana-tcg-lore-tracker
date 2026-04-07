@@ -1,16 +1,11 @@
 // GameoverScreen.kt
-package com.example.lorcanatcgloretracker.presentation
+package com.bluevolume.wearlorcanaloretracker.presentation
 
-import android.Manifest
 import android.app.Activity
 import android.content.ContentValues
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.media.MediaScannerConnection
 import android.media.SoundPool
 import android.net.Uri
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
@@ -29,7 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -49,45 +43,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
-import com.example.lorcanatcgloretracker.R
-import com.example.lorcanatcgloretracker.presentation.theme.DarkestColor
-import com.example.lorcanatcgloretracker.presentation.theme.MyFontFamily
-import com.example.lorcanatcgloretracker.presentation.theme.SecondaryColor
+import com.bluevolume.wearlorcanaloretracker.R
+import com.bluevolume.wearlorcanaloretracker.presentation.theme.DarkestColor
+import com.bluevolume.wearlorcanaloretracker.presentation.theme.MyFontFamily
+import com.bluevolume.wearlorcanaloretracker.presentation.theme.SecondaryColor
 
-fun takeScreenshot(activity: Activity, onResult: (Boolean) -> Unit) {
+fun captureScreenshotToGallery(activity: Activity, onResult: (Boolean) -> Unit) {
     val window = activity.window
     val view = window.decorView.rootView
     val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        try {
-            PixelCopy.request(
-                window,
-                bitmap,
-                { result ->
-                    if (result == PixelCopy.SUCCESS) {
-                        saveBitmap(activity, bitmap)
-                        onResult(true)
-                    } else {
-                        onResult(false)
-                    }
-                },
-                Handler(Looper.getMainLooper())
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            onResult(false)
-        }
-    } else {
-        // Safe legacy fallback
-        val legacyBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-        val canvas = android.graphics.Canvas(legacyBitmap)
-        view.draw(canvas)
-        saveBitmap(activity, legacyBitmap)
-        onResult(true)
+    try {
+        PixelCopy.request(
+            window,
+            bitmap,
+            { result ->
+                if (result == PixelCopy.SUCCESS) {
+                    saveBitmap(activity, bitmap)
+                    onResult(true)
+                } else {
+                    onResult(false)
+                }
+            },
+            Handler(Looper.getMainLooper())
+        )
+    } catch (e: Exception) {
+        e.printStackTrace()
+        onResult(false)
     }
 }
 
@@ -97,11 +79,7 @@ fun saveBitmap(activity: Activity, bitmap: Bitmap): Uri? {
     val contentValues = ContentValues().apply {
         put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
         put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Screenshots")
-        } else {
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "Screenshots")
-        }
+        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Screenshots")
         put(MediaStore.Images.Media.IS_PENDING, 1)
     }
 
@@ -115,48 +93,11 @@ fun saveBitmap(activity: Activity, bitmap: Bitmap): Uri? {
         contentValues.clear()
         contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
         resolver.update(uri, contentValues, null, null)
-
-        MediaScannerConnection.scanFile(
-            activity,
-            arrayOf("/storage/emulated/0/Pictures/Screenshots/$filename"),
-            arrayOf("image/png"),
-            null
-        )
     } ?: run {
         Toast.makeText(activity, "Failed to save screenshot", Toast.LENGTH_SHORT).show()
     }
 
     return imageUri
-}
-
-fun shareScreenshot(activity: Activity) {
-    val window = activity.window
-    val view = window.decorView.rootView
-    val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-
-    fun doShare(bmp: Bitmap) {
-        val uri = saveBitmap(activity, bmp) ?: return
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "image/png"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        activity.startActivity(Intent.createChooser(shareIntent, "Share game result"))
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        try {
-            PixelCopy.request(window, bitmap, { result ->
-                if (result == PixelCopy.SUCCESS) doShare(bitmap)
-            }, Handler(Looper.getMainLooper()))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    } else {
-        val canvas = android.graphics.Canvas(bitmap)
-        view.draw(canvas)
-        doShare(bitmap)
-    }
 }
 
 @Composable
@@ -171,7 +112,12 @@ fun GameoverScreen(
     val soundPool = remember { SoundPool.Builder().setMaxStreams(2).build() }
     val muted by settingsViewModel.muted.collectAsState()
 
-    val soundGameWon = remember { soundPool.load(activity, R.raw.game_complete, 1) }
+    val selectedTheme by settingsViewModel.selectedTheme.collectAsState()
+    val gameMode by settingsViewModel.gameMode.collectAsState()
+    val villainWon = gameMode != "standard" && winner != "You Win!"
+
+    val winSoundRes = if (villainWon) R.raw.villain_win else R.raw.game_complete
+    val soundGameWon = remember(winSoundRes) { soundPool.load(activity, winSoundRes, 1) }
 
     DisposableEffect(Unit) {
         soundPool.setOnLoadCompleteListener { _, _, status ->
@@ -187,12 +133,20 @@ fun GameoverScreen(
     }
 
     rememberNavController()
-    val selectedTheme by settingsViewModel.selectedTheme.collectAsState()
+
+    val backgroundRes = when {
+        gameMode == "jaf" && villainWon -> R.drawable.image_background_jaf_win
+        gameMode == "jaf" -> R.drawable.image_background_jaf
+        gameMode == "urs" && villainWon -> R.drawable.image_background_urs_win
+        gameMode == "urs" -> R.drawable.image_background_urs
+        else -> R.drawable.image_background
+    }
+    val villainTint = if (gameMode == "jaf") Color(0xFF8B0000) else Color(0xFF4B0082)
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (selectedTheme == "image") {
             Image(
-                painter = painterResource(id = R.drawable.image_background),
+                painter = painterResource(id = backgroundRes),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -203,6 +157,13 @@ fun GameoverScreen(
                     .fillMaxSize()
                     .background(Color.Black)
             )
+            if (selectedTheme == "dark" && gameMode != "standard") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(villainTint.copy(alpha = 0.25f))
+                )
+            }
         }
 
         Column(
@@ -248,39 +209,16 @@ fun GameoverScreen(
                 Button(
                     onClick = {
                         activity?.let { act ->
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                takeScreenshot(act) { success ->
-                                    Toast.makeText(
-                                        context,
-                                        if (success) "Screenshot saved" else "Failed to save screenshot",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            } else {
-                                if (ContextCompat.checkSelfPermission(
-                                        context,
-                                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                                    ) != PackageManager.PERMISSION_GRANTED
-                                ) {
-                                    ActivityCompat.requestPermissions(
-                                        act,
-                                        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                                        1000
-                                    )
-                                    Toast.makeText(
-                                        context,
-                                        "Please grant storage permission and try again",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    return@let
-                                }
-                                takeScreenshot(act) { success ->
-                                    Toast.makeText(
-                                        context,
-                                        if (success) "Screenshot saved" else "Failed to save screenshot",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                            captureScreenshotToGallery(act) { success ->
+                                Toast.makeText(
+                                    context,
+                                    if (success) {
+                                        context.getString(R.string.screenshot_saved)
+                                    } else {
+                                        context.getString(R.string.screenshot_failed)
+                                    },
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     },
@@ -295,24 +233,6 @@ fun GameoverScreen(
                     Icon(
                         imageVector = Icons.Default.Save,
                         contentDescription = "Save Icon",
-                        tint = if (selectedTheme == "oled") Color.Black else DarkestColor,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                // Share button
-                Button(
-                    onClick = { activity?.let { shareScreenshot(it) } },
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectedTheme == "oled") Color.White else SecondaryColor,
-                        contentColor = if (selectedTheme == "oled") Color.Black else DarkestColor
-                    ),
-                    modifier = Modifier.size(40.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "Share Icon",
                         tint = if (selectedTheme == "oled") Color.Black else DarkestColor,
                         modifier = Modifier.size(24.dp)
                     )

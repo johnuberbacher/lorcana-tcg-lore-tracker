@@ -1,5 +1,5 @@
 // CounterSide.kt
-package com.example.lorcanatcgloretracker.presentation
+package com.bluevolume.wearlorcanaloretracker.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

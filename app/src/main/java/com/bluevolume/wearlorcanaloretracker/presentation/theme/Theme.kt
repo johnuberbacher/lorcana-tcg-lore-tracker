@@ -1,5 +1,5 @@
 // Theme.kt
-package com.example.lorcanatcgloretracker.presentation.theme
+package com.bluevolume.wearlorcanaloretracker.presentation.theme
 
 import androidx.compose.material3.MaterialTheme // Material 3 Theme
 import androidx.compose.material3.darkColorScheme // Material 3 color scheme

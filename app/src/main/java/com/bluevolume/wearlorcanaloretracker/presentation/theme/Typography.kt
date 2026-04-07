@@ -1,5 +1,5 @@
 // Typography.kt
-package com.example.lorcanatcgloretracker.presentation.theme
+package com.bluevolume.wearlorcanaloretracker.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
@@ -7,7 +7,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.example.lorcanatcgloretracker.R
+import com.bluevolume.wearlorcanaloretracker.R
 
 val MyFontFamily = FontFamily(
     Font(R.font.bystander_semibold, FontWeight.Normal),

@@ -1,5 +1,5 @@
 // SettingsScreen.kt
-package com.example.lorcanatcgloretracker.presentation
+package com.bluevolume.wearlorcanaloretracker.presentation
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +28,7 @@ import androidx.wear.compose.material3.lazy.transformedHeight
 fun SettingsScreen(settingsViewModel: SettingsViewModel) {
     val selectedTheme by settingsViewModel.selectedTheme.collectAsState()
     val muted by settingsViewModel.muted.collectAsState()
+    val gameMode by settingsViewModel.gameMode.collectAsState()
 
     val listState = rememberTransformingLazyColumnState()
     val spec = rememberTransformationSpec()
@@ -42,6 +43,61 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel) {
             modifier = Modifier.fillMaxSize(),
             contentPadding = contentPadding
         ) {
+            item {
+                ListHeader(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .transformedHeight(this, spec),
+                    transformation = SurfaceTransformation(spec)
+                ) {
+                    Text("Game Mode")
+                }
+            }
+            item {
+                RadioButton(
+                    selected = gameMode == "standard",
+                    onSelect = { settingsViewModel.setGameMode("standard") },
+                    label = { Text("Standard") },
+                    colors = RadioButtonDefaults.radioButtonColors(
+                        selectedContainerColor = Color(0xFF373B70),
+                        unselectedContainerColor = Color(0xFF1C1C1A),
+                    ),
+                    transformation = SurfaceTransformation(spec),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .transformedHeight(this, spec)
+                )
+            }
+            item {
+                RadioButton(
+                    selected = gameMode == "urs",
+                    onSelect = { settingsViewModel.setGameMode("urs") },
+                    label = { Text("Deep Trouble") },
+                    colors = RadioButtonDefaults.radioButtonColors(
+                        selectedContainerColor = Color(0xFF373B70),
+                        unselectedContainerColor = Color(0xFF1C1C1A),
+                    ),
+                    transformation = SurfaceTransformation(spec),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .transformedHeight(this, spec)
+                )
+            }
+            item {
+                RadioButton(
+                    selected = gameMode == "jaf",
+                    onSelect = { settingsViewModel.setGameMode("jaf") },
+                    label = { Text("Palace Heist") },
+                    colors = RadioButtonDefaults.radioButtonColors(
+                        selectedContainerColor = Color(0xFF373B70),
+                        unselectedContainerColor = Color(0xFF1C1C1A),
+                    ),
+                    transformation = SurfaceTransformation(spec),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .transformedHeight(this, spec)
+                )
+            }
             item {
                 ListHeader(
                     modifier = Modifier

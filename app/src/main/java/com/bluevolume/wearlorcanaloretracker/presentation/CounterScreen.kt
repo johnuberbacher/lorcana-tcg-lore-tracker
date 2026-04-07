@@ -1,4 +1,4 @@
-package com.example.lorcanatcgloretracker.presentation
+package com.bluevolume.wearlorcanaloretracker.presentation
 
 import android.util.Log
 import androidx.compose.foundation.background

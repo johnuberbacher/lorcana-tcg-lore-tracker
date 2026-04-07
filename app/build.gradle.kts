@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.lorcanatcgloretracker"
+    namespace = "com.bluevolume.wearlorcanaloretracker"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.lorcanatcgloretracker"
+        applicationId = "com.bluevolume.wearlorcanaloretracker"
         minSdk = 30
         targetSdk = 36
         versionCode = 1
@@ -18,6 +18,9 @@ android {
 
     buildTypes {
         release {
+            // Unsigned release cannot be installed; use debug cert for local runs.
+            // For Play Store, add a release signingConfig and point it at your keystore.
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -40,7 +43,6 @@ android {
 }
 
 dependencies {
-    implementation(libs.play.services.wearable)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
     implementation(libs.ui.graphics)

@@ -1,5 +1,5 @@
 // Colors.kt
-package com.example.lorcanatcgloretracker.presentation.theme
+package com.bluevolume.wearlorcanaloretracker.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
