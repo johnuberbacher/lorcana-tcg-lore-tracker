@@ -35,8 +35,8 @@ class MainComplicationService : SuspendingComplicationDataSourceService() {
     private fun buildComplicationData(tapAction: PendingIntent?) =
         SmallImageComplicationData.Builder(
             smallImage = SmallImage.Builder(
-                image = Icon.createWithResource(this, R.mipmap.ic_launcher_foreground),
-                type = SmallImageType.PHOTO
+                image = Icon.createWithResource(this, R.drawable.complication_icon),
+                type = SmallImageType.ICON
             ).build(),
             contentDescription = PlainComplicationText.Builder("Open Lorcana Lore Tracker").build()
         ).apply {

@@ -27,7 +27,14 @@ class SettingsDataStore(private val context: Context) {
         .map { preferences -> preferences[SettingsKeys.MUTED] ?: false }
 
     val gameMode: Flow<String> = context.settingsDataStore.data
-        .map { preferences -> preferences[SettingsKeys.GAME_MODE] ?: "standard" }
+        .map { preferences ->
+            when (preferences[SettingsKeys.GAME_MODE]) {
+                null -> "standard"
+                "jafar" -> "jaf" // legacy value from before the mode was renamed
+                "ursula" -> "urs" // legacy value from before the mode was renamed
+                else -> preferences[SettingsKeys.GAME_MODE]!!
+            }
+        }
 
     // Setters
     suspend fun setTheme(theme: String) {

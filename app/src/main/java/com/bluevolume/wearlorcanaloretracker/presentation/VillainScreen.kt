@@ -57,7 +57,7 @@ fun VillainMainScreen(
     val crownHolder by settingsViewModel.crownHolder.collectAsState()
     val isGameOver by settingsViewModel.isGameOver.collectAsState()
 
-    val villainName = if (gameMode == "jaf") "Jaf" else "Urs"
+    val villainName = if (gameMode == "jaf") "Jafar" else "Ursula"
     val villainTint = if (gameMode == "jaf") Color(0xFF8B0000) else Color(0xFF4B0082)
 
     val context = LocalContext.current
@@ -192,7 +192,7 @@ fun VillainMainScreen(
                     ) {
                         if (gameMode == "jaf") {
                             Text(
-                                text = if (crownHolder == "players") "Crown: You" else "Crown: Jaf",
+                                text = if (crownHolder == "players") "Crown: You" else "Crown: Jafar",
                                 fontFamily = MyFontFamily,
                                 color = if (selectedTheme == "oled") Color.White else SecondaryColor,
                                 fontSize = 14.sp,

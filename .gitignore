@@ -23,12 +23,14 @@ captures/
 local.properties
 *.log
 
+# Signing keys - never commit these
+*.jks
+*.keystore
+keystore.properties
+
 # Gradle files
 /build/
-/gradle/
 .gradle/
-/*.gradle
-/*.gradle.kts
 
 # Jetpack Compose specific (generated UI classes)
 **/build/
